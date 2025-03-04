@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { Search, ExternalLink, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, ExternalLink, AlertCircle, CheckCircle, File, FileText, X } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import CustomButton from '@/components/ui/CustomButton';
 import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
@@ -9,7 +9,8 @@ import { cn } from '@/lib/utils';
 
 const OnlineCheck = () => {
   const { toast } = useToast();
-  const [text, setText] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<null | { 
     score: number; 
@@ -17,15 +18,63 @@ const OnlineCheck = () => {
     sources: Array<{ url: string; similarity: number; title: string }>;
   }>(null);
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setText(e.target.value);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
   };
 
-  const analyzeText = () => {
-    if (text.trim().length < 50) {
+  const handleFile = (newFile: File) => {
+    // Check if file is PDF, DOCX, or other acceptable format
+    const acceptedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    
+    if (!acceptedTypes.includes(newFile.type)) {
       toast({
-        title: "Text too short",
-        description: "Please enter at least 50 characters for accurate plagiarism detection.",
+        title: "Invalid file type",
+        description: "Please upload a PDF, DOCX, or TXT file.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Check file size (max 10MB)
+    if (newFile.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload a file smaller than 10MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setFile(newFile);
+    setResults(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const analyzeFile = () => {
+    if (!file) {
+      toast({
+        title: "No file selected",
+        description: "Please upload a document to check for plagiarism.",
         variant: "destructive"
       });
       return;
@@ -55,14 +104,28 @@ const OnlineCheck = () => {
       
       toast({
         title: "Analysis Complete",
-        description: "We've completed the plagiarism analysis of your text.",
+        description: "We've completed the plagiarism analysis of your document.",
       });
     }, 2500);
   };
 
-  const clearText = () => {
-    setText('');
+  const clearFile = () => {
+    setFile(null);
     setResults(null);
+  };
+
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    
+    switch(extension) {
+      case 'pdf':
+        return <FileText size={24} className="text-red-500" />;
+      case 'docx':
+      case 'doc':
+        return <FileText size={24} className="text-blue-500" />;
+      default:
+        return <File size={24} className="text-gray-500" />;
+    }
   };
 
   return (
@@ -73,7 +136,7 @@ const OnlineCheck = () => {
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">Online Plagiarism Check</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Check text directly against online sources to verify originality and identify 
+            Upload documents and check them against online sources to verify originality and identify 
             potential plagiarism in real-time.
           </p>
         </div>
@@ -83,39 +146,84 @@ const OnlineCheck = () => {
             <GlassmorphismCard className="h-full">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">Enter Text to Check</h3>
-                  <div>
-                    <CustomButton 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={clearText}
-                    >
-                      Clear
-                    </CustomButton>
-                  </div>
+                  <h3 className="text-xl font-semibold">Upload Document to Check</h3>
+                  {file && (
+                    <div>
+                      <CustomButton 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={clearFile}
+                      >
+                        Clear
+                      </CustomButton>
+                    </div>
+                  )}
                 </div>
 
-                <textarea
-                  className="w-full h-64 p-4 bg-secondary/30 rounded-lg border border-border focus:border-veri/50 focus:ring-1 focus:ring-veri/50 transition-all outline-none resize-none"
-                  placeholder="Paste or type the text you want to check for plagiarism here..."
-                  value={text}
-                  onChange={handleTextChange}
-                ></textarea>
-                
-                <div className="flex justify-between items-center mt-4 text-sm text-muted-foreground">
-                  <span>{text.length} characters</span>
-                  <span>Minimum 50 characters required</span>
+                <div
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-8 text-center transition-all",
+                    isDragging 
+                      ? "border-veri bg-veri/5"
+                      : "border-border hover:border-veri/50 hover:bg-secondary/30",
+                    file ? "bg-secondary/30" : ""
+                  )}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  {!file ? (
+                    <div className="flex flex-col items-center">
+                      <Upload size={48} className="text-muted-foreground mb-4" />
+                      <h4 className="font-medium mb-2">Drag & drop your document here</h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Supported formats: PDF, DOCX, TXT (Max 10MB)
+                      </p>
+                      <label className="cursor-pointer">
+                        <CustomButton 
+                          variant="outline"
+                          size="sm"
+                          type="button"
+                        >
+                          Browse Files
+                        </CustomButton>
+                        <input 
+                          type="file" 
+                          className="hidden" 
+                          onChange={handleFileChange}
+                          accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-4">
+                      {getFileIcon(file.name)}
+                      <div className="flex-1 text-left">
+                        <p className="font-medium truncate max-w-md">{file.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      <button 
+                        className="p-1 rounded-full hover:bg-secondary/50 text-muted-foreground"
+                        onClick={clearFile}
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-6">
                   <CustomButton 
-                    onClick={analyzeText} 
+                    onClick={analyzeFile} 
                     loading={isAnalyzing}
                     fullWidth 
                     size="lg"
-                    icon={<Search size={18} />}
+                    icon={<Upload size={18} />}
+                    disabled={!file}
                   >
-                    {isAnalyzing ? "Analyzing Text..." : "Check for Plagiarism"}
+                    {isAnalyzing ? "Analyzing Document..." : "Check for Plagiarism"}
                   </CustomButton>
                 </div>
               </div>
@@ -131,7 +239,7 @@ const OnlineCheck = () => {
                   <div className="flex flex-col items-center justify-center h-60 text-center">
                     <AlertCircle size={40} className="text-muted-foreground mb-4" />
                     <p className="text-muted-foreground">
-                      No results yet. Enter text and run a plagiarism check to see results here.
+                      No results yet. Upload a document and run a plagiarism check to see results here.
                     </p>
                   </div>
                 )}
@@ -140,7 +248,7 @@ const OnlineCheck = () => {
                   <div className="flex flex-col items-center justify-center h-60 text-center">
                     <div className="w-12 h-12 border-4 border-t-transparent border-veri rounded-full animate-spin mb-4"></div>
                     <p className="text-muted-foreground">
-                      Analyzing text for plagiarism...
+                      Analyzing document for plagiarism...
                     </p>
                   </div>
                 )}
@@ -231,26 +339,26 @@ const OnlineCheck = () => {
         <div className="mt-12">
           <GlassmorphismCard>
             <div className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Online Plagiarism Detection</h3>
+              <h3 className="text-xl font-semibold mb-4">Document Plagiarism Detection</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <h4 className="text-lg font-medium mb-3">How It Works</h4>
                   <ul className="space-y-2 text-muted-foreground">
                     <li className="flex items-start">
                       <span className="inline-block w-5 h-5 rounded-full bg-veri/10 text-veri flex items-center justify-center mr-2 mt-0.5 text-xs font-bold">1</span>
-                      <span>Paste your text in the editor or type directly</span>
+                      <span>Upload your document (PDF, DOCX, or TXT format)</span>
                     </li>
                     <li className="flex items-start">
                       <span className="inline-block w-5 h-5 rounded-full bg-veri/10 text-veri flex items-center justify-center mr-2 mt-0.5 text-xs font-bold">2</span>
-                      <span>Our algorithms compare your text with billions of online sources</span>
+                      <span>Our algorithms extract and analyze the text from your document</span>
                     </li>
                     <li className="flex items-start">
                       <span className="inline-block w-5 h-5 rounded-full bg-veri/10 text-veri flex items-center justify-center mr-2 mt-0.5 text-xs font-bold">3</span>
-                      <span>Receive a detailed analysis with similarity scores and matching sources</span>
+                      <span>The content is compared against billions of online sources</span>
                     </li>
                     <li className="flex items-start">
                       <span className="inline-block w-5 h-5 rounded-full bg-veri/10 text-veri flex items-center justify-center mr-2 mt-0.5 text-xs font-bold">4</span>
-                      <span>Review highlighted sections to identify potential plagiarism</span>
+                      <span>Receive a detailed analysis with similarity scores and matching sources</span>
                     </li>
                   </ul>
                 </div>
@@ -272,7 +380,7 @@ const OnlineCheck = () => {
                     </li>
                     <li className="flex items-start">
                       <CheckCircle size={16} className="text-veri mr-2 mt-0.5" />
-                      <span>For longer documents, use the document upload feature instead</span>
+                      <span>For text-only checking, use the "Text Check" feature</span>
                     </li>
                   </ul>
                 </div>

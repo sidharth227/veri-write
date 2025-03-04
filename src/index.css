@@ -64,7 +64,7 @@
     /* VeriWrite brand colors in dark mode */
     --veri: 0 72% 51%;
     --veri-foreground: 0 0% 100%;
-    --write: 0 0% 100%;
+    --write: 0 0% 100%; /* white in dark mode */
     --write-foreground: 0 0% 0%;
 
     --primary: 0 72% 51%;
@@ -116,6 +116,51 @@
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom animations */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
 }
 
 /* Smooth transitions between pages */

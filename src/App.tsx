@@ -10,6 +10,9 @@ import Classroom from "./pages/Classroom";
 import UploadCheck from "./pages/UploadCheck";
 import OnlineCheck from "./pages/OnlineCheck";
 import Contact from "./pages/Contact";
+import AboutUs from "./pages/AboutUs";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +28,9 @@ const App = () => (
           <Route path="/upload-check" element={<UploadCheck />} />
           <Route path="/online-check" element={<OnlineCheck />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

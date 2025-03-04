@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import Logo from './Logo';
+import DarkModeToggle from './DarkModeToggle';
 import { Menu, X } from 'lucide-react';
 
 const navItems = [
@@ -66,16 +67,22 @@ const Navbar = () => {
               {item.name}
             </Link>
           ))}
+          
+          {/* Dark mode toggle */}
+          <DarkModeToggle />
         </div>
 
         {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden text-foreground" 
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="md:hidden flex items-center gap-4">
+          <DarkModeToggle />
+          <button 
+            className="text-foreground" 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}

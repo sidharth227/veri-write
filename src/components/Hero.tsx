@@ -1,5 +1,6 @@
 
-import { ArrowRight, CheckCircle, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle, Shield } from 'lucide-react';
 import CustomButton from './ui/CustomButton';
 import { cn } from '@/lib/utils';
 
@@ -8,6 +9,16 @@ interface HeroProps {
 }
 
 const Hero = ({ className }: HeroProps) => {
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate('/classroom');
+  };
+
+  const handleLearnMore = () => {
+    navigate('/about');
+  };
+
   return (
     <section 
       className={cn(
@@ -20,14 +31,6 @@ const Hero = ({ className }: HeroProps) => {
       
       {/* Radial glow behind the hero content */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-veri/5 rounded-full blur-3xl -z-10" />
-
-      {/* Animated dots pattern (purely decorative) */}
-      <div className="absolute inset-0 opacity-20 -z-10">
-        <div className="absolute top-20 left-20 w-4 h-4 rounded-full bg-veri animate-pulse" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute top-40 right-40 w-3 h-3 rounded-full bg-write animate-pulse" style={{ animationDelay: '1.2s' }} />
-        <div className="absolute bottom-32 left-1/4 w-5 h-5 rounded-full bg-veri animate-pulse" style={{ animationDelay: '0.7s' }} />
-        <div className="absolute bottom-60 right-1/3 w-6 h-6 rounded-full bg-write animate-pulse" style={{ animationDelay: '1.5s' }} />
-      </div>
 
       {/* Hero content */}
       <div className="container max-w-5xl mx-auto">
@@ -53,14 +56,14 @@ const Hero = ({ className }: HeroProps) => {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 opacity-0 animate-fade-in" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
           <CustomButton 
             size="lg" 
-            icon={<ArrowRight size={18} />} 
-            iconPosition="right"
+            onClick={handleGetStarted}
           >
             Get Started
           </CustomButton>
           <CustomButton 
             variant="outline" 
             size="lg"
+            onClick={handleLearnMore}
           >
             Learn More
           </CustomButton>

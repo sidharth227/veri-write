@@ -1,14 +1,16 @@
 
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
-import CustomButton from '@/components/ui/CustomButton';
 import Logo from '@/components/Logo';
-import { ArrowRight, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   // Scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,38 +23,6 @@ const Index = () => {
       <main>
         <Hero />
         <Features />
-        
-        {/* CTA Section */}
-        <section className="py-20 px-6 bg-veri">
-          <div className="container max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Ready to protect academic integrity?
-            </h2>
-            <p className="text-white/90 mb-8 max-w-2xl mx-auto">
-              Join educators worldwide who trust VeriWrite to uphold standards of academic honesty
-              and foster an environment of original thinking.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <CustomButton 
-                className="bg-white text-veri hover:bg-white/90" 
-                size="lg" 
-                icon={<ArrowRight size={18} />} 
-                iconPosition="right"
-              >
-                Get Started Now
-              </CustomButton>
-              <Link to="/contact">
-                <CustomButton 
-                  variant="outline" 
-                  className="border-white text-white hover:bg-white/10" 
-                  size="lg"
-                >
-                  Contact Sales
-                </CustomButton>
-              </Link>
-            </div>
-          </div>
-        </section>
       </main>
       
       {/* Footer */}
@@ -80,8 +50,8 @@ const Index = () => {
               <ul className="space-y-2">
                 <li><Link to="/about" className="text-muted-foreground hover:text-foreground text-sm">About Us</Link></li>
                 <li><Link to="/contact" className="text-muted-foreground hover:text-foreground text-sm">Contact Us</Link></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground text-sm">Privacy Policy</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground text-sm">Terms of Service</a></li>
+                <li><Link to="/privacy-policy" className="text-muted-foreground hover:text-foreground text-sm">Privacy Policy</Link></li>
+                <li><Link to="/terms-of-service" className="text-muted-foreground hover:text-foreground text-sm">Terms of Service</Link></li>
               </ul>
             </div>
             
@@ -90,7 +60,7 @@ const Index = () => {
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <Mail size={16} className="text-muted-foreground mt-0.5" />
-                  <span className="text-muted-foreground text-sm">contact@veriwrite.com</span>
+                  <span className="text-muted-foreground text-sm">22cs362@mgits.ac</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Phone size={16} className="text-muted-foreground mt-0.5" />
