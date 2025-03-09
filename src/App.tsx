@@ -4,9 +4,15 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 import Classroom from "./pages/Classroom";
+import StudentDashboard from "./pages/StudentDashboard";
 import UploadCheck from "./pages/UploadCheck";
 import OnlineCheck from "./pages/OnlineCheck";
 import Contact from "./pages/Contact";
@@ -22,18 +28,56 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/classroom" element={<Classroom />} />
-          <Route path="/upload-check" element={<UploadCheck />} />
-          <Route path="/online-check" element={<OnlineCheck />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            
+            {/* Protected routes - Teacher */}
+            <Route 
+              path="/classroom" 
+              element={
+                <ProtectedRoute requiredRole="teacher">
+                  <Classroom />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/upload-check" 
+              element={
+                <ProtectedRoute requiredRole="teacher">
+                  <UploadCheck />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/online-check" 
+              element={
+                <ProtectedRoute requiredRole="teacher">
+                  <OnlineCheck />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Protected routes - Student */}
+            <Route 
+              path="/student-dashboard" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <StudentDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Catch all */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

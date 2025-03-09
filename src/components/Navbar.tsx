@@ -4,20 +4,46 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import Logo from './Logo';
 import DarkModeToggle from './DarkModeToggle';
-import { Menu, X } from 'lucide-react';
-
-const navItems = [
-  { name: 'Home', path: '/' },
-  { name: 'Classroom', path: '/classroom' },
-  { name: 'Upload & Check', path: '/upload-check' },
-  { name: 'Online Check', path: '/online-check' },
-  { name: 'Contact Us', path: '/contact' }
-];
+import { Menu, X, LogOut } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  // Define navigation items based on authentication status and user role
+  const getNavItems = () => {
+    // Items for non-authenticated users
+    if (!isAuthenticated) {
+      return [
+        { name: 'Home', path: '/' },
+        { name: 'Contact Us', path: '/contact' },
+        { name: 'Login/Signup', path: '/auth' }
+      ];
+    }
+    
+    // Items for teachers
+    if (user?.role === 'teacher') {
+      return [
+        { name: 'Home', path: '/' },
+        { name: 'Classroom', path: '/classroom' },
+        { name: 'Upload & Check', path: '/upload-check' },
+        { name: 'Online Check', path: '/online-check' },
+        { name: 'Contact Us', path: '/contact' }
+      ];
+    }
+    
+    // Items for students
+    return [
+      { name: 'Home', path: '/' },
+      { name: 'Dashboard', path: '/student-dashboard' },
+      { name: 'Contact Us', path: '/contact' }
+    ];
+  };
+
+  const navItems = getNavItems();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,6 +94,18 @@ const Navbar = () => {
             </Link>
           ))}
           
+          {/* Show logout button if authenticated */}
+          {isAuthenticated && (
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+              aria-label="Logout"
+            >
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
+          )}
+          
           {/* Dark mode toggle */}
           <DarkModeToggle />
         </div>
@@ -108,6 +146,22 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Show logout button if authenticated */}
+            {isAuthenticated && (
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors animate-fade-in"
+                aria-label="Logout"
+                style={{ 
+                  animationDelay: `${0.1 + navItems.length * 0.1}s`, 
+                  animationFillMode: 'backwards' 
+                }}
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            )}
           </div>
         </div>
       )}
