@@ -12,6 +12,8 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Classroom from "./pages/Classroom";
+import CourseView from "./pages/CourseView";
+import AssignmentView from "./pages/AssignmentView";
 import StudentDashboard from "./pages/StudentDashboard";
 import UploadCheck from "./pages/UploadCheck";
 import OnlineCheck from "./pages/OnlineCheck";
@@ -44,6 +46,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="teacher">
                   <Classroom />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/classroom/:courseId" 
+              element={
+                <ProtectedRoute requiredRole="teacher">
+                  <CourseView />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/classroom/:courseId/assignment/:assignmentId" 
+              element={
+                <ProtectedRoute requiredRole="teacher">
+                  <AssignmentView />
                 </ProtectedRoute>
               } 
             />
