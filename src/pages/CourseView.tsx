@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PlusCircle, FileText, Calendar, Users, ArrowLeft, DownloadCloud } from 'lucide-react';
+import { 
+  PlusCircle, FileText, Calendar, Users, ArrowLeft, 
+  DownloadCloud, Trash2, UserPlus 
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 import Navbar from '@/components/Navbar';
 import CustomButton from '@/components/ui/CustomButton';
 import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
+import ManageStudents from '@/components/ManageStudents';
 import { format } from 'date-fns';
 
 interface Assignment {
@@ -15,6 +19,7 @@ interface Assignment {
   submissionsCount: number;
   totalStudents: number;
   type: 'assignment' | 'exam';
+  description?: string;
 }
 
 interface Course {
@@ -36,6 +41,8 @@ const CourseView = () => {
   const [assignmentType, setAssignmentType] = useState<'assignment' | 'exam'>('assignment');
   const [assignmentDeadline, setAssignmentDeadline] = useState('');
   const [assignmentFile, setAssignmentFile] = useState<File | null>(null);
+  const [description, setDescription] = useState('');
+  const [showManageStudents, setShowManageStudents] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -60,7 +67,8 @@ const CourseView = () => {
           deadline: new Date(2023, 11, 15),
           submissionsCount: 28,
           totalStudents: 32,
-          type: 'assignment'
+          type: 'assignment',
+          description: 'A comprehensive midterm assignment.'
         },
         {
           id: '2',
@@ -68,7 +76,8 @@ const CourseView = () => {
           deadline: new Date(2023, 11, 30),
           submissionsCount: 20,
           totalStudents: 32,
-          type: 'assignment'
+          type: 'assignment',
+          description: 'An extensive final project to test cumulative knowledge.'
         },
         {
           id: '3',
@@ -76,11 +85,34 @@ const CourseView = () => {
           deadline: new Date(2023, 10, 25),
           submissionsCount: 32,
           totalStudents: 32,
-          type: 'exam'
+          type: 'exam',
+          description: 'A practical exam to evaluate hands-on skills.'
         }
       ]);
     }
   }, [courseId]);
+
+  const handleDeleteAssignment = (assignmentId: string) => {
+    const assignment = assignments.find(a => a.id === assignmentId);
+    setAssignments(prev => prev.filter(a => a.id !== assignmentId));
+    
+    if (assignment) {
+      toast({
+        title: `${assignment.type === 'assignment' ? 'Assignment' : 'Exam'} deleted`,
+        description: `${assignment.title} has been deleted.`,
+      });
+    }
+  };
+
+  const handleDeleteCourse = () => {
+    if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+      toast({
+        title: "Course deleted",
+        description: `${course?.name} has been deleted.`,
+      });
+      navigate('/classroom');
+    }
+  };
 
   const handleCreateAssignment = () => {
     if (!assignmentTitle.trim()) {
@@ -107,13 +139,15 @@ const CourseView = () => {
       deadline: new Date(assignmentDeadline),
       submissionsCount: 0,
       totalStudents: course?.students || 0,
-      type: assignmentType
+      type: assignmentType,
+      description: description
     };
 
     setAssignments(prev => [newAssignment, ...prev]);
     setAssignmentTitle('');
     setAssignmentDeadline('');
     setAssignmentFile(null);
+    setDescription('');
     setShowCreateAssignment(false);
     
     toast({
@@ -164,11 +198,25 @@ const CourseView = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-3">
+              <CustomButton
+                variant="outline"
+                onClick={() => setShowManageStudents(true)}
+                icon={<UserPlus className="h-4 w-4" />}
+              >
+                Manage Students
+              </CustomButton>
               <CustomButton 
                 onClick={() => setShowCreateAssignment(true)}
                 icon={<PlusCircle className="h-4 w-4" />}
               >
-                Create Assignment
+                Create Assignment or Exam
+              </CustomButton>
+              <CustomButton 
+                variant="outline"
+                onClick={handleDeleteCourse}
+                icon={<Trash2 className="h-4 w-4" />}
+              >
+                Delete Course
               </CustomButton>
             </div>
           </div>
@@ -211,6 +259,15 @@ const CourseView = () => {
             </GlassmorphismCard>
           </div>
           
+          {showManageStudents && (
+            <div className="mb-8">
+              <ManageStudents
+                courseId={courseId || ''}
+                onClose={() => setShowManageStudents(false)}
+              />
+            </div>
+          )}
+          
           {showCreateAssignment && (
             <GlassmorphismCard className="mb-8 p-6 animate-fade-in">
               <h2 className="text-xl font-bold mb-4">{assignmentType === 'assignment' ? 'Create New Assignment' : 'Create New Exam'}</h2>
@@ -251,6 +308,17 @@ const CourseView = () => {
                     placeholder={`e.g., Midterm ${assignmentType === 'assignment' ? 'Assignment' : 'Exam'}`}
                     value={assignmentTitle}
                     onChange={(e) => setAssignmentTitle(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description</label>
+                  <textarea
+                    className="w-full p-2 border border-border rounded-md bg-background"
+                    rows={3}
+                    placeholder="Enter assignment description..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
                 
@@ -351,12 +419,22 @@ const CourseView = () => {
                       </div>
                     </div>
                     
-                    <CustomButton 
-                      onClick={() => navigate(`/classroom/${courseId}/assignment/${assignment.id}`)}
-                      size="sm"
-                    >
-                      View {assignment.type === 'exam' ? 'Exam' : 'Assignment'}
-                    </CustomButton>
+                    <div className="flex items-center gap-2">
+                      <CustomButton 
+                        onClick={() => navigate(`/classroom/${courseId}/assignment/${assignment.id}`)}
+                        size="sm"
+                      >
+                        View {assignment.type === 'exam' ? 'Exam' : 'Assignment'}
+                      </CustomButton>
+                      <CustomButton 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteAssignment(assignment.id)}
+                        icon={<Trash2 className="h-4 w-4" />}
+                      >
+                        Delete
+                      </CustomButton>
+                    </div>
                   </div>
                 </GlassmorphismCard>
               ))
