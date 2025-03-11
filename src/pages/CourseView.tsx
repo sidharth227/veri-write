@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PlusCircle, FileText, Calendar, Users, ArrowLeft, DownloadCloud } from 'lucide-react';
@@ -38,15 +37,12 @@ const CourseView = () => {
   const [assignmentDeadline, setAssignmentDeadline] = useState('');
   const [assignmentFile, setAssignmentFile] = useState<File | null>(null);
 
-  // Scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Mock data fetch for course details
   useEffect(() => {
     if (courseId) {
-      // In a real app, this would be an API call to fetch course details
       setCourse({
         id: courseId,
         name: courseId === '1' ? 'Advanced Programming' : 
@@ -57,7 +53,6 @@ const CourseView = () => {
         color: 'from-blue-500/20 to-blue-600/20'
       });
 
-      // Mock assignments data
       setAssignments([
         {
           id: '1',
@@ -106,7 +101,6 @@ const CourseView = () => {
       return;
     }
 
-    // Create new assignment
     const newAssignment: Assignment = {
       id: Date.now().toString(),
       title: assignmentTitle,
@@ -179,7 +173,6 @@ const CourseView = () => {
             </div>
           </div>
           
-          {/* Class statistics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <GlassmorphismCard className="p-6">
               <div className="flex items-center gap-4">
@@ -218,7 +211,6 @@ const CourseView = () => {
             </GlassmorphismCard>
           </div>
           
-          {/* Create assignment form */}
           {showCreateAssignment && (
             <GlassmorphismCard className="mb-8 p-6 animate-fade-in">
               <h2 className="text-xl font-bold mb-4">{assignmentType === 'assignment' ? 'Create New Assignment' : 'Create New Exam'}</h2>
@@ -295,7 +287,6 @@ const CourseView = () => {
                           type="button"
                           variant="outline"
                           size="sm"
-                          as="span"
                         >
                           Select File
                         </CustomButton>
@@ -328,7 +319,6 @@ const CourseView = () => {
             </GlassmorphismCard>
           )}
           
-          {/* Assignments list */}
           <h2 className="text-xl font-bold mb-4">Assignments & Exams</h2>
           <div className="space-y-4">
             {assignments.length > 0 ? (
@@ -391,7 +381,6 @@ const CourseView = () => {
         </div>
       </main>
       
-      {/* Simple footer */}
       <footer className="bg-secondary py-6 px-6">
         <div className="container mx-auto text-center">
           <p className="text-muted-foreground text-sm">
