@@ -10,7 +10,7 @@ import { Mail, Lock, User, BookOpen, GraduationCap } from 'lucide-react';
 type AuthMode = 'signin' | 'signup';
 
 const Auth = () => {
-  const { isAuthenticated, login, signup, googleLogin, isLoading } = useAuth();
+  const { isAuthenticated, login, signup, isLoading } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState<AuthMode>('signin');
   const [role, setRole] = useState<UserRole>('teacher');
@@ -40,10 +40,6 @@ const Auth = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    await googleLogin(role);
-  };
-
   const toggleMode = () => {
     setMode(mode === 'signin' ? 'signup' : 'signin');
     // Reset form when switching modes
@@ -53,26 +49,33 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background to-secondary/30">
       <Navbar />
       
-      <main className="flex-grow pt-32 pb-16 px-6">
-        <div className="container mx-auto max-w-md">
+      <main className="flex-grow pt-24 pb-16 px-6 relative">
+        {/* Decorative background elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -left-20 w-96 h-96 bg-veri/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/3 -right-20 w-96 h-96 bg-write/5 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-20 left-1/4 w-96 h-96 bg-veri/5 rounded-full blur-3xl"></div>
+        </div>
+      
+        <div className="container mx-auto max-w-md relative z-10 animate-fade-in">
           <h1 className="text-3xl font-bold mb-8 text-center">
-            {mode === 'signin' ? 'Sign In to VeriWrite' : 'Create Your VeriWrite Account'}
+            {mode === 'signin' ? 'Welcome back to VeriWrite' : 'Create Your VeriWrite Account'}
           </h1>
           
-          <GlassmorphismCard className="p-8">
+          <GlassmorphismCard className="p-8 shadow-xl" intensity="heavy">
             {/* Role Selection */}
-            <div className="mb-6">
+            <div className="mb-6 animate-slide-up">
               <p className="text-sm font-medium mb-2">I am a:</p>
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={() => setRole('teacher')}
-                  className={`flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
+                  className={`flex items-center justify-center gap-2 p-3 rounded-lg border transition-all duration-300 ${
                     role === 'teacher'
-                      ? 'border-veri bg-veri/10 text-foreground'
+                      ? 'border-veri bg-veri/10 text-foreground shadow-md'
                       : 'border-border bg-secondary/30 text-muted-foreground hover:bg-secondary/50'
                   }`}
                 >
@@ -82,9 +85,9 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => setRole('student')}
-                  className={`flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
+                  className={`flex items-center justify-center gap-2 p-3 rounded-lg border transition-all duration-300 ${
                     role === 'student'
-                      ? 'border-veri bg-veri/10 text-foreground'
+                      ? 'border-veri bg-veri/10 text-foreground shadow-md'
                       : 'border-border bg-secondary/30 text-muted-foreground hover:bg-secondary/50'
                   }`}
                 >
@@ -96,7 +99,7 @@ const Auth = () => {
             
             <form onSubmit={handleSubmit} className="space-y-4">
               {mode === 'signup' && (
-                <div>
+                <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
                   <label htmlFor="name" className="block text-sm font-medium mb-1">Full Name</label>
                   <div className="relative">
                     <span className="absolute left-3 top-3 text-muted-foreground">
@@ -107,7 +110,7 @@ const Auth = () => {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full pl-10 p-3 bg-secondary/30 rounded-lg border border-border focus:border-veri/50 focus:outline-none"
+                      className="w-full pl-10 p-3 bg-secondary/30 rounded-lg border border-border focus:border-veri/50 focus:outline-none focus:ring-2 focus:ring-veri/20 transition-all"
                       placeholder="John Doe"
                       required
                     />
@@ -115,7 +118,7 @@ const Auth = () => {
                 </div>
               )}
               
-              <div>
+              <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
                 <label htmlFor="email" className="block text-sm font-medium mb-1">Email Address</label>
                 <div className="relative">
                   <span className="absolute left-3 top-3 text-muted-foreground">
@@ -126,14 +129,14 @@ const Auth = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 p-3 bg-secondary/30 rounded-lg border border-border focus:border-veri/50 focus:outline-none"
+                    className="w-full pl-10 p-3 bg-secondary/30 rounded-lg border border-border focus:border-veri/50 focus:outline-none focus:ring-2 focus:ring-veri/20 transition-all"
                     placeholder="your@email.com"
                     required
                   />
                 </div>
               </div>
               
-              <div>
+              <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
                 <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
                 <div className="relative">
                   <span className="absolute left-3 top-3 text-muted-foreground">
@@ -144,7 +147,7 @@ const Auth = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 p-3 bg-secondary/30 rounded-lg border border-border focus:border-veri/50 focus:outline-none"
+                    className="w-full pl-10 p-3 bg-secondary/30 rounded-lg border border-border focus:border-veri/50 focus:outline-none focus:ring-2 focus:ring-veri/20 transition-all"
                     placeholder="••••••••"
                     required
                     minLength={8}
@@ -152,58 +155,23 @@ const Auth = () => {
                 </div>
               </div>
               
-              <div>
+              <div className="animate-slide-up" style={{ animationDelay: '400ms' }}>
                 <CustomButton
                   type="submit"
                   fullWidth
                   loading={isLoading}
+                  className="mt-2"
                 >
                   {mode === 'signin' ? 'Sign In' : 'Create Account'}
                 </CustomButton>
               </div>
             </form>
             
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-            
-            <CustomButton
-              variant="outline"
-              fullWidth
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5 mr-2" aria-hidden="true">
-                <path
-                  d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
-                  fill="#EA4335"
-                />
-                <path
-                  d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.08L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.075C15.0054 18.785 13.6204 19.25 12.0004 19.25C8.8704 19.25 6.21537 17.14 5.2654 14.295L1.27539 17.39C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
-                  fill="#34A853"
-                />
-              </svg>
-              Sign {mode === 'signin' ? 'in' : 'up'} with Google
-            </CustomButton>
-            
-            <div className="mt-6 text-center">
+            <div className="mt-6 text-center animate-slide-up" style={{ animationDelay: '500ms' }}>
               <p className="text-sm text-muted-foreground">
                 {mode === 'signin' ? "Don't have an account? " : "Already have an account? "}
                 <button 
-                  className="text-veri hover:underline" 
+                  className="text-veri hover:underline font-medium transition-colors" 
                   onClick={toggleMode}
                   type="button"
                 >
@@ -216,7 +184,7 @@ const Auth = () => {
       </main>
       
       {/* Footer */}
-      <footer className="bg-secondary py-6 px-6">
+      <footer className="bg-secondary/70 backdrop-blur-sm py-6 px-6 border-t border-border/50">
         <div className="container mx-auto text-center">
           <p className="text-muted-foreground text-sm">
             © {new Date().getFullYear()} VeriWrite. All rights reserved.
