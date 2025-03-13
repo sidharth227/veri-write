@@ -1,11 +1,12 @@
 
 import { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Upload, FileText, AlertCircle, CheckCircle, FileDown, Eye, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import CustomButton from '@/components/ui/CustomButton';
 import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
 import { cn } from '@/lib/utils';
+import Footer from '@/components/Footer';
 
 const UploadCheck = () => {
   const { toast } = useToast();
@@ -13,6 +14,7 @@ const UploadCheck = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<null | { score: number; matches: number }>(null);
+  const [activeStep, setActiveStep] = useState<number>(0);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -102,6 +104,25 @@ const UploadCheck = () => {
       description: "Your plagiarism report is being downloaded as a PDF.",
     });
   };
+
+  // Steps for the "How It Works" section
+  const steps = [
+    {
+      title: "Upload Documents",
+      description: "Upload your documents in PDF, Word, or text format for analysis.",
+      icon: <Upload className="text-veri" size={24} />
+    },
+    {
+      title: "Analyze Content",
+      description: "Our system compares your text against billions of documents and web pages.",
+      icon: <CheckCircle className="text-veri" size={24} />
+    },
+    {
+      title: "Review Results",
+      description: "Get detailed similarity scores and source information in an easy-to-read report.",
+      icon: <FileText className="text-veri" size={24} />
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30">
@@ -313,33 +334,45 @@ const UploadCheck = () => {
             <GlassmorphismCard>
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-6">How It Works</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-14 h-14 rounded-full bg-veri/10 flex items-center justify-center mb-4 shadow-md">
-                      <span className="text-veri font-bold text-lg">1</span>
-                    </div>
-                    <h4 className="font-medium mb-2">Upload Documents</h4>
-                    <p className="text-muted-foreground text-sm">
-                      Upload your documents in PDF, Word, or text format for analysis.
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-14 h-14 rounded-full bg-veri/10 flex items-center justify-center mb-4 shadow-md">
-                      <span className="text-veri font-bold text-lg">2</span>
-                    </div>
-                    <h4 className="font-medium mb-2">Analyze Content</h4>
-                    <p className="text-muted-foreground text-sm">
-                      Our system compares your text against billions of documents and web pages.
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-14 h-14 rounded-full bg-veri/10 flex items-center justify-center mb-4 shadow-md">
-                      <span className="text-veri font-bold text-lg">3</span>
-                    </div>
-                    <h4 className="font-medium mb-2">Review Results</h4>
-                    <p className="text-muted-foreground text-sm">
-                      Get detailed similarity scores and source information in an easy-to-read report.
-                    </p>
+                
+                {/* Interactive stepper */}
+                <div className="relative">
+                  {/* Progress line */}
+                  <div className="absolute left-7 top-0 bottom-0 w-0.5 bg-gradient-to-b from-veri/50 via-veri/30 to-veri/10 z-0"></div>
+                  
+                  <div className="space-y-8">
+                    {steps.map((step, index) => (
+                      <div 
+                        key={index}
+                        className={`relative flex items-start gap-4 p-4 rounded-xl transition-all duration-300 ${
+                          activeStep === index ? 'bg-veri/5 shadow-sm transform scale-102' : 'hover:bg-veri/5'
+                        }`}
+                        onMouseEnter={() => setActiveStep(index)}
+                      >
+                        <div className={`w-14 h-14 rounded-full flex items-center justify-center z-10 transition-all duration-500 ${
+                          activeStep === index 
+                            ? 'bg-veri/20 shadow-veri/20 shadow-md' 
+                            : 'bg-veri/10'
+                        }`}>
+                          {step.icon}
+                        </div>
+                        
+                        <div className="flex-1">
+                          <h4 className={`font-medium text-lg mb-2 transition-colors ${
+                            activeStep === index ? 'text-veri' : ''
+                          }`}>
+                            {step.title}
+                          </h4>
+                          <p className="text-muted-foreground">
+                            {step.description}
+                          </p>
+                        </div>
+                        
+                        {activeStep === index && (
+                          <div className="absolute -inset-px bg-veri/5 rounded-xl -z-10 animate-pulse opacity-50"></div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -347,6 +380,8 @@ const UploadCheck = () => {
           </div>
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 };

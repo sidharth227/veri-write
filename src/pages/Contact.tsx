@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import CustomButton from '@/components/ui/CustomButton';
 import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -158,7 +159,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <h3 className="font-medium">Phone</h3>
-                      <p className="text-muted-foreground mt-1">+1 (555) 123-4567</p>
+                      <p className="text-muted-foreground mt-1">+91 9876543210</p>
                     </div>
                   </div>
                   
@@ -169,9 +170,9 @@ const Contact = () => {
                     <div>
                       <h3 className="font-medium">Address</h3>
                       <p className="text-muted-foreground mt-1">
-                        123 Academic Ave<br />
-                        Education City, EC 12345<br />
-                        United States
+                        VeriWrite, Muthoot Institute of Technology and Science<br />
+                        Varikoli P.O, Puthencruz - 682308<br />
+                        India
                       </p>
                     </div>
                   </div>
@@ -201,6 +202,8 @@ const Contact = () => {
           </div>
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 };

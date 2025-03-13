@@ -68,7 +68,7 @@ const Auth = () => {
           <GlassmorphismCard className="p-8 shadow-xl" intensity="heavy">
             {/* Role Selection */}
             <div className="mb-6 animate-slide-up">
-              <p className="text-sm font-medium mb-2">I am a:</p>
+              <p className="text-sm font-medium mb-2">Role:</p>
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"

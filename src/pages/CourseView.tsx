@@ -10,6 +10,7 @@ import Navbar from '@/components/Navbar';
 import CustomButton from '@/components/ui/CustomButton';
 import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
 import ManageStudents from '@/components/ManageStudents';
+import Footer from '@/components/Footer';
 import { format } from 'date-fns';
 
 interface Assignment {
@@ -171,6 +172,7 @@ const CourseView = () => {
             <p>Loading course details...</p>
           </div>
         </main>
+        <Footer />
       </div>
     );
   }
@@ -459,13 +461,7 @@ const CourseView = () => {
         </div>
       </main>
       
-      <footer className="bg-secondary py-6 px-6">
-        <div className="container mx-auto text-center">
-          <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} VeriWrite. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
