@@ -15,6 +15,8 @@ import Classroom from "./pages/Classroom";
 import CourseView from "./pages/CourseView";
 import AssignmentView from "./pages/AssignmentView";
 import StudentDashboard from "./pages/StudentDashboard";
+import StudentCourseView from "./pages/StudentCourseView";
+import StudentAssignmentView from "./pages/StudentAssignmentView";
 import UploadCheck from "./pages/UploadCheck";
 import OnlineCheck from "./pages/OnlineCheck";
 import Contact from "./pages/Contact";
@@ -88,6 +90,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="student">
                   <StudentDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student-course/:courseId" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <StudentCourseView />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student-assignment/:courseId/:assignmentId" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <StudentAssignmentView />
                 </ProtectedRoute>
               } 
             />
