@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, FileText, Calendar, Clock, Check, AlertTriangle, File, X } from 'lucide-react';
+import { ArrowLeft, Upload, FileText, Calendar, Clock, Check, AlertTriangle, File, X, Award, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 import Navbar from '@/components/Navbar';
@@ -18,6 +18,7 @@ interface Assignment {
   submittedAt?: Date;
   description?: string;
   type: 'assignment' | 'exam';
+  submissionLate?: boolean;
 }
 
 interface Submission {
@@ -27,6 +28,13 @@ interface Submission {
   submittedAt: Date;
   status: 'processing' | 'checked' | 'error';
   similarity?: number;
+  late?: boolean;
+  score?: number;
+  markDistribution?: {
+    section: string;
+    maxMarks: number;
+    scored: number;
+  }[];
 }
 
 const StudentAssignmentView = () => {
@@ -38,6 +46,7 @@ const StudentAssignmentView = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [showMarkDistribution, setShowMarkDistribution] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -72,7 +81,8 @@ const StudentAssignmentView = () => {
             fileSize: 2.4 * 1024 * 1024, // 2.4 MB
             submittedAt: new Date(2023, 11, 10),
             status: 'checked',
-            similarity: 12
+            similarity: 12,
+            late: false
           }
         ]);
       } else if (assignmentId === '2') {
@@ -104,7 +114,14 @@ const StudentAssignmentView = () => {
             fileSize: 1.8 * 1024 * 1024, // 1.8 MB
             submittedAt: new Date(2023, 10, 24),
             status: 'checked',
-            similarity: 5
+            similarity: 5,
+            late: false,
+            score: 85,
+            markDistribution: [
+              { section: 'Data Structures & Algorithms', maxMarks: 40, scored: 35 },
+              { section: 'Object-Oriented Design', maxMarks: 30, scored: 25 },
+              { section: 'Asynchronous Programming', maxMarks: 30, scored: 25 }
+            ]
           }
         ]);
       } else {
@@ -170,6 +187,9 @@ const StudentAssignmentView = () => {
     
     setIsUploading(true);
     
+    // Determine if submission is late
+    const isLate = assignment ? new Date() > assignment.deadline : false;
+    
     // Simulate file upload
     setTimeout(() => {
       const newSubmission: Submission = {
@@ -177,7 +197,8 @@ const StudentAssignmentView = () => {
         fileName: selectedFile.name,
         fileSize: selectedFile.size,
         submittedAt: new Date(),
-        status: 'processing'
+        status: 'processing',
+        late: isLate
       };
       
       setSubmissions(prev => [newSubmission, ...prev]);
@@ -188,13 +209,16 @@ const StudentAssignmentView = () => {
         setAssignment({
           ...assignment,
           submitted: true,
-          submittedAt: new Date()
+          submittedAt: new Date(),
+          submissionLate: isLate
         });
       }
       
       toast({
         title: "Submission successful",
-        description: "Your file has been uploaded successfully",
+        description: isLate ? 
+          "Your file has been uploaded successfully. Note: This was a late submission." : 
+          "Your file has been uploaded successfully",
       });
       
       // Simulate processing
@@ -202,11 +226,28 @@ const StudentAssignmentView = () => {
         setSubmissions(prev => 
           prev.map(sub => {
             if (sub.id === newSubmission.id) {
-              return {
-                ...sub,
-                status: 'checked',
-                similarity: Math.floor(Math.random() * 30)
-              };
+              // For exams, add automatic evaluation data
+              if (assignment?.type === 'exam') {
+                const score = Math.floor(Math.random() * 21) + 70; // Random score between 70-90
+                return {
+                  ...sub,
+                  status: 'checked',
+                  similarity: Math.floor(Math.random() * 20), // Lower similarity for exams
+                  score: score,
+                  markDistribution: [
+                    { section: 'Data Structures & Algorithms', maxMarks: 40, scored: Math.floor(score * 0.4) },
+                    { section: 'Object-Oriented Design', maxMarks: 30, scored: Math.floor(score * 0.3) },
+                    { section: 'Asynchronous Programming', maxMarks: 30, scored: Math.floor(score * 0.3) }
+                  ]
+                };
+              } else {
+                // For regular assignments
+                return {
+                  ...sub,
+                  status: 'checked',
+                  similarity: Math.floor(Math.random() * 30)
+                };
+              }
             }
             return sub;
           })
@@ -289,14 +330,15 @@ const StudentAssignmentView = () => {
                     {assignment.submitted ? (
                       <>
                         <Check className="h-4 w-4 text-green-500" />
-                        <span className="text-sm text-green-500">
+                        <span className={`text-sm ${assignment.submissionLate ? 'text-amber-500' : 'text-green-500'}`}>
                           Submitted on {format(assignment.submittedAt!, 'MMMM d, yyyy')}
+                          {assignment.submissionLate && ' (Late)'}
                         </span>
                       </>
                     ) : isPastDeadline ? (
                       <>
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                        <span className="text-sm text-red-500">Deadline passed</span>
+                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                        <span className="text-sm text-amber-500">Deadline passed (Late submission allowed)</span>
                       </>
                     ) : (
                       <>
@@ -308,87 +350,151 @@ const StudentAssignmentView = () => {
                 </div>
               </GlassmorphismCard>
               
+              {/* Exam score display (if available) */}
+              {assignment.type === 'exam' && submissions.length > 0 && submissions[0].score && (
+                <GlassmorphismCard className="p-6 mb-6 border-veri/30">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
+                    <div className="flex items-center gap-2 mb-2 sm:mb-0">
+                      <Award className="h-5 w-5 text-veri" />
+                      <h2 className="text-lg font-semibold">Exam Result</h2>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="px-4 py-2 bg-veri/10 rounded-md">
+                        <span className="text-lg font-bold text-veri">{submissions[0].score}</span>
+                        <span className="text-sm text-muted-foreground">/100</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button 
+                    className="flex w-full items-center justify-between p-3 bg-muted/40 rounded-md mb-3 hover:bg-muted/70 transition-colors"
+                    onClick={() => setShowMarkDistribution(!showMarkDistribution)}
+                  >
+                    <span className="font-medium">Mark Distribution</span>
+                    {showMarkDistribution ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                  
+                  {showMarkDistribution && submissions[0].markDistribution && (
+                    <div className="animate-fade-in">
+                      <div className="border rounded-md overflow-hidden">
+                        <table className="w-full">
+                          <thead className="bg-muted/30">
+                            <tr>
+                              <th className="text-left p-3 text-sm font-medium">Section</th>
+                              <th className="text-center p-3 text-sm font-medium">Max Marks</th>
+                              <th className="text-center p-3 text-sm font-medium">Marks Obtained</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {submissions[0].markDistribution.map((item, index) => (
+                              <tr key={index} className="border-t">
+                                <td className="p-3 text-sm">{item.section}</td>
+                                <td className="p-3 text-sm text-center">{item.maxMarks}</td>
+                                <td className="p-3 text-sm text-center">
+                                  <span className={item.scored >= item.maxMarks * 0.7 ? 'text-green-500' : 'text-amber-500'}>
+                                    {item.scored}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                            <tr className="border-t bg-muted/20 font-medium">
+                              <td className="p-3 text-sm">Total</td>
+                              <td className="p-3 text-sm text-center">100</td>
+                              <td className="p-3 text-sm text-center">{submissions[0].score}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </GlassmorphismCard>
+              )}
+              
               {/* File submission section */}
               <GlassmorphismCard className="p-6">
                 <h2 className="text-lg font-semibold mb-4">Submit Your Work</h2>
                 
-                {!isPastDeadline ? (
-                  <div>
-                    <div 
-                      className="border-2 border-dashed border-border rounded-md p-8 text-center cursor-pointer hover:bg-muted/10 transition-colors mb-6"
-                      onClick={handleBrowseClick}
-                    >
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        className="hidden"
-                        onChange={handleFileChange}
-                        accept=".pdf,.doc,.docx,.txt"
-                      />
-                      
-                      <div className="flex flex-col items-center">
-                        <Upload className="h-12 w-12 text-muted-foreground mb-3" />
-                        
-                        {selectedFile ? (
-                          <div className="animate-fade-in">
-                            <p className="font-medium mb-1">{selectedFile.name}</p>
-                            <p className="text-sm text-muted-foreground mb-3">
-                              {formatFileSize(selectedFile.size)}
-                            </p>
-                            <div className="flex justify-center gap-3">
-                              <CustomButton
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedFile(null);
-                                }}
-                                icon={<X className="h-4 w-4" />}
-                              >
-                                Remove
-                              </CustomButton>
-                              <CustomButton
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSubmit();
-                                }}
-                                loading={isUploading}
-                                icon={<Upload className="h-4 w-4" />}
-                              >
-                                Submit
-                              </CustomButton>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <p className="text-lg font-medium mb-2">
-                              Drag and drop your file here
-                            </p>
-                            <p className="text-sm text-muted-foreground mb-4">
-                              or click to browse from your computer
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Supported formats: PDF, Word, Text (Max 10MB)
-                            </p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-destructive/10 p-4 rounded-md mb-6">
+                {isPastDeadline && (
+                  <div className="bg-amber-500/10 p-4 rounded-md mb-6">
                     <div className="flex items-start gap-3">
-                      <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
+                      <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
                       <div>
-                        <p className="font-medium text-destructive">Submission closed</p>
+                        <p className="font-medium text-amber-500">Deadline has passed</p>
                         <p className="text-sm text-muted-foreground">
-                          The deadline for this assignment has passed. You can no longer submit your work.
+                          The deadline for this assignment has passed. You can still submit, but it will be marked as late.
                         </p>
                       </div>
                     </div>
                   </div>
                 )}
+                
+                <div>
+                  <div 
+                    className="border-2 border-dashed border-border rounded-md p-8 text-center cursor-pointer hover:bg-muted/10 transition-colors mb-6"
+                    onClick={handleBrowseClick}
+                  >
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      onChange={handleFileChange}
+                      accept=".pdf,.doc,.docx,.txt"
+                    />
+                    
+                    <div className="flex flex-col items-center">
+                      <Upload className="h-12 w-12 text-muted-foreground mb-3" />
+                      
+                      {selectedFile ? (
+                        <div className="animate-fade-in">
+                          <p className="font-medium mb-1">{selectedFile.name}</p>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {formatFileSize(selectedFile.size)}
+                          </p>
+                          <div className="flex justify-center gap-3">
+                            <CustomButton
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedFile(null);
+                              }}
+                              icon={<X className="h-4 w-4" />}
+                            >
+                              Remove
+                            </CustomButton>
+                            <CustomButton
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSubmit();
+                              }}
+                              loading={isUploading}
+                              icon={<Upload className="h-4 w-4" />}
+                            >
+                              Submit
+                            </CustomButton>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-lg font-medium mb-2">
+                            Drag and drop your file here
+                          </p>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            or click to browse from your computer
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Supported formats: PDF, Word, Text (Max 10MB)
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 
                 {/* Previous submissions */}
                 {submissions.length > 0 && (
@@ -406,10 +512,16 @@ const StudentAssignmentView = () => {
                             </div>
                             <div>
                               <p className="font-medium text-sm line-clamp-1">{submission.fileName}</p>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                                 <span>{formatFileSize(submission.fileSize)}</span>
                                 <span>•</span>
                                 <span>{format(submission.submittedAt, 'MMM d, yyyy h:mm a')}</span>
+                                {submission.late && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="text-amber-500">Late submission</span>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -424,20 +536,28 @@ const StudentAssignmentView = () => {
                                 Processing
                               </span>
                             ) : submission.status === 'checked' ? (
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                (submission.similarity || 0) > 30
-                                  ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                                  : (submission.similarity || 0) > 15
-                                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
-                                  : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                              }`}>
-                                {(submission.similarity || 0) > 30 ? (
-                                  <AlertTriangle className="mr-1" size={12} />
-                                ) : (
-                                  <Check className="mr-1" size={12} />
+                              <div className="flex flex-col items-end gap-1">
+                                {assignment.type === 'exam' && submission.score && (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-veri/10 text-veri">
+                                    <Award className="mr-1" size={12} />
+                                    Score: {submission.score}/100
+                                  </span>
                                 )}
-                                {submission.similarity}% similarity
-                              </span>
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  (submission.similarity || 0) > 30
+                                    ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                    : (submission.similarity || 0) > 15
+                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+                                    : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                }`}>
+                                  {(submission.similarity || 0) > 30 ? (
+                                    <AlertTriangle className="mr-1" size={12} />
+                                  ) : (
+                                    <Check className="mr-1" size={12} />
+                                  )}
+                                  {submission.similarity}% similarity
+                                </span>
+                              </div>
                             ) : (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
                                 <X className="mr-1" size={12} />
@@ -460,8 +580,19 @@ const StudentAssignmentView = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Status</span>
-                    <span className={`text-sm font-medium ${assignment.submitted ? 'text-green-500' : 'text-amber-500'}`}>
-                      {assignment.submitted ? 'Submitted' : 'Pending'}
+                    <span className={`text-sm font-medium ${
+                      assignment.submitted 
+                        ? assignment.submissionLate 
+                          ? 'text-amber-500' 
+                          : 'text-green-500' 
+                        : 'text-amber-500'
+                    }`}>
+                      {assignment.submitted 
+                        ? assignment.submissionLate 
+                          ? 'Submitted (Late)' 
+                          : 'Submitted' 
+                        : 'Pending'
+                      }
                     </span>
                   </div>
                   
@@ -482,18 +613,29 @@ const StudentAssignmentView = () => {
                   )}
                   
                   {submissions.length > 0 && submissions[0].status === 'checked' && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Similarity Score</span>
-                      <span className={`text-sm font-medium ${
-                        (submissions[0].similarity || 0) > 30
-                          ? 'text-red-500'
-                          : (submissions[0].similarity || 0) > 15
-                          ? 'text-amber-500'
-                          : 'text-green-500'
-                      }`}>
-                        {submissions[0].similarity}%
-                      </span>
-                    </div>
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Similarity Score</span>
+                        <span className={`text-sm font-medium ${
+                          (submissions[0].similarity || 0) > 30
+                            ? 'text-red-500'
+                            : (submissions[0].similarity || 0) > 15
+                            ? 'text-amber-500'
+                            : 'text-green-500'
+                        }`}>
+                          {submissions[0].similarity}%
+                        </span>
+                      </div>
+                      
+                      {assignment.type === 'exam' && submissions[0].score && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Exam Score</span>
+                          <span className="text-sm font-medium text-veri">
+                            {submissions[0].score}/100
+                          </span>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </GlassmorphismCard>
@@ -515,7 +657,11 @@ const StudentAssignmentView = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                    <span>You can submit multiple times before the deadline</span>
+                    <span>You can submit multiple times</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                    <span>Late submissions will be marked accordingly</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
