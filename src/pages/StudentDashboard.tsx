@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, PlusCircle, Clock, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
+import { BookOpen, PlusCircle, Clock, FileText, CheckCircle, AlertTriangle, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 import Navbar from '@/components/Navbar';
