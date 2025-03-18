@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
 import CustomButton from '@/components/ui/CustomButton';
 import { Mail, Lock, User, BookOpen, GraduationCap } from 'lucide-react';
+import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal';
 
 type AuthMode = 'signin' | 'signup';
 
@@ -17,6 +18,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -137,7 +139,18 @@ const Auth = () => {
               </div>
               
               <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
-                <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="password" className="block text-sm font-medium">Password</label>
+                  {mode === 'signin' && (
+                    <button 
+                      type="button"
+                      onClick={() => setIsForgotPasswordOpen(true)}
+                      className="text-xs text-veri hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  )}
+                </div>
                 <div className="relative">
                   <span className="absolute left-3 top-3 text-muted-foreground">
                     <Lock size={18} />
@@ -183,14 +196,12 @@ const Auth = () => {
         </div>
       </main>
       
-      {/* Footer */}
-      <footer className="bg-secondary/70 backdrop-blur-sm py-6 px-6 border-t border-border/50">
-        <div className="container mx-auto text-center">
-          <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} VeriWrite. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
+      
+      <ForgotPasswordModal 
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+      />
     </div>
   );
 };

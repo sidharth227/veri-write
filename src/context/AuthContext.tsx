@@ -20,6 +20,9 @@ interface AuthContextType {
   signup: (name: string, email: string, password: string, role: UserRole) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  updateProfile: (updatedUser: Partial<User>) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -151,6 +154,85 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     navigate('/');
   };
 
+  // New function to update user profile
+  const updateProfile = async (updatedUser: Partial<User>) => {
+    try {
+      setIsLoading(true);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      if (user) {
+        const newUser = { ...user, ...updatedUser };
+        setUser(newUser);
+        localStorage.setItem('veriwrite_user', JSON.stringify(newUser));
+        
+        toast({
+          title: "Profile updated successfully",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Profile update failed",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // New function to change password
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      setIsLoading(true);
+      // Simulate API call - in a real app, this would verify the current password
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      // For demo purposes, we'll just show a success message
+      toast({
+        title: "Password changed successfully",
+        description: "Your password has been updated.",
+      });
+      
+      return Promise.resolve();
+    } catch (error) {
+      toast({
+        title: "Password change failed",
+        description: error instanceof Error ? error.message : "Invalid current password",
+        variant: "destructive",
+      });
+      return Promise.reject(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // New function to reset password (for forgot password flow)
+  const resetPassword = async (email: string) => {
+    try {
+      setIsLoading(true);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      // For demo purposes, we'll just show a success message
+      toast({
+        title: "Password reset email sent",
+        description: `Instructions to reset your password have been sent to ${email}`,
+      });
+      
+      return Promise.resolve();
+    } catch (error) {
+      toast({
+        title: "Password reset failed",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive",
+      });
+      return Promise.reject(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value = {
     user,
     isLoading,
@@ -159,6 +241,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signup,
     logout,
     isAuthenticated: !!user,
+    updateProfile,
+    changePassword,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
