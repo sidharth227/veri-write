@@ -14,6 +14,7 @@ import ExamResult from '@/components/student/ExamResult';
 import FileUploader from '@/components/student/FileUploader';
 import PreviousSubmissions from '@/components/student/PreviousSubmissions';
 import SubmissionStatusSidebar from '@/components/student/SubmissionStatusSidebar';
+import TeachersRemark from '@/components/student/TeachersRemark';
 
 interface Assignment {
   id: string;
@@ -24,6 +25,7 @@ interface Assignment {
   description?: string;
   type: 'assignment' | 'exam';
   submissionLate?: boolean;
+  teacherRemark?: string | null;
 }
 
 interface Submission {
@@ -74,7 +76,8 @@ const StudentAssignmentView = () => {
           submitted: true,
           submittedAt: new Date(2023, 11, 10),
           description: 'Create a functional web application that demonstrates your understanding of the core concepts covered in the course, including:\n\n1. User authentication and authorization\n2. Database integration with at least 3 related models\n3. Form handling with validation\n4. Responsive UI design\n\nSubmit your complete source code and a brief report explaining your implementation.',
-          type: 'assignment'
+          type: 'assignment',
+          teacherRemark: 'Good work on implementing the authentication system. Your database models are well structured. However, the UI could be more responsive on mobile devices. Consider using a mobile-first approach for future projects.'
         });
         
         setSubmissions([
@@ -95,7 +98,8 @@ const StudentAssignmentView = () => {
           deadline: new Date(2023, 11, 30),
           submitted: false,
           description: 'Develop a complete full-stack application with authentication, database integration, and responsive UI. Your application should demonstrate your mastery of the following:\n\n1. Advanced state management\n2. API integration\n3. Data validation and error handling\n4. Performance optimization\n5. Security best practices\n\nSubmit your complete source code, a detailed report, and a video demonstration of your application.',
-          type: 'assignment'
+          type: 'assignment',
+          teacherRemark: null
         });
         
         setSubmissions([]);
@@ -107,7 +111,8 @@ const StudentAssignmentView = () => {
           submitted: true,
           submittedAt: new Date(2023, 10, 24),
           description: 'A hands-on exam to test your practical skills in programming and problem-solving. You will implement solutions to three programming challenges within the allotted time.\n\nEach challenge tests different aspects:\n1. Data structures and algorithms\n2. Object-oriented design\n3. Asynchronous programming\n\nSubmit your solutions as a single compressed file.',
-          type: 'exam'
+          type: 'exam',
+          teacherRemark: 'Excellent work on the algorithms section. Your solution to the graph problem was elegant and efficient. For the object-oriented design, consider using more inheritance to reduce code duplication. Overall, a strong performance!'
         });
         
         setSubmissions([
@@ -134,7 +139,8 @@ const StudentAssignmentView = () => {
           deadline: new Date(2023, 12, 5),
           submitted: false,
           description: 'Implement the discussed algorithms and submit your code with proper documentation. Your submission should include implementations of:\n\n1. Depth-First Search\n2. Breadth-First Search\n3. Dijkstra\'s Shortest Path\n\nInclude test cases and performance analysis for each algorithm.',
-          type: 'assignment'
+          type: 'assignment',
+          teacherRemark: null
         });
         
         setSubmissions([]);
@@ -270,6 +276,9 @@ const StudentAssignmentView = () => {
                 assignment={assignment} 
                 isPastDeadline={isPastDeadline} 
               />
+              
+              {/* Teacher's Remark (if available) */}
+              <TeachersRemark remark={assignment.teacherRemark} />
               
               {/* Exam score display (if available) */}
               {assignment.type === 'exam' && submissions.length > 0 && submissions[0].score && (
