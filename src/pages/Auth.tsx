@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth, UserRole } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
 import CustomButton from '@/components/ui/CustomButton';
 import { Mail, Lock, User, BookOpen, GraduationCap } from 'lucide-react';
@@ -20,14 +20,12 @@ const Auth = () => {
   const [name, setName] = useState('');
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
 
-  // Scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -44,7 +42,6 @@ const Auth = () => {
 
   const toggleMode = () => {
     setMode(mode === 'signin' ? 'signup' : 'signin');
-    // Reset form when switching modes
     setEmail('');
     setPassword('');
     setName('');
@@ -55,7 +52,6 @@ const Auth = () => {
       <Navbar />
       
       <main className="flex-grow pt-24 pb-16 px-6 relative">
-        {/* Decorative background elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute -top-20 -left-20 w-96 h-96 bg-veri/5 rounded-full blur-3xl"></div>
           <div className="absolute top-1/3 -right-20 w-96 h-96 bg-write/5 rounded-full blur-3xl"></div>
@@ -68,7 +64,6 @@ const Auth = () => {
           </h1>
           
           <GlassmorphismCard className="p-8 shadow-xl" intensity="heavy">
-            {/* Role Selection */}
             <div className="mb-6 animate-slide-up">
               <p className="text-sm font-medium mb-2">Role:</p>
               <div className="grid grid-cols-2 gap-4">
