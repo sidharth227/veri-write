@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Upload, ExternalLink, AlertCircle, CheckCircle, File, FileText, X } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import CustomButton from '@/components/ui/CustomButton';
 import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
 import { cn } from '@/lib/utils';
@@ -129,10 +130,10 @@ const OnlineCheck = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       
-      <main className="container max-w-6xl mx-auto pt-28 pb-16 px-6">
+      <main className="container max-w-6xl mx-auto pt-28 pb-16 px-6 flex-grow">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">Online Plagiarism Check</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -338,57 +339,82 @@ const OnlineCheck = () => {
 
         <div className="mt-12">
           <GlassmorphismCard>
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Document Plagiarism Detection</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="p-8">
+              <h3 className="text-2xl font-semibold mb-8 text-center">How Our Plagiarism Detection Works</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div>
-                  <h4 className="text-lg font-medium mb-3">How It Works</h4>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li className="flex items-start">
-                      <span className="inline-block w-5 h-5 rounded-full bg-veri/10 text-veri flex items-center justify-center mr-2 mt-0.5 text-xs font-bold">1</span>
-                      <span>Upload your document (PDF, DOCX, or TXT format)</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="inline-block w-5 h-5 rounded-full bg-veri/10 text-veri flex items-center justify-center mr-2 mt-0.5 text-xs font-bold">2</span>
-                      <span>Our algorithms extract and analyze the text from your document</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="inline-block w-5 h-5 rounded-full bg-veri/10 text-veri flex items-center justify-center mr-2 mt-0.5 text-xs font-bold">3</span>
-                      <span>The content is compared against billions of online sources</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="inline-block w-5 h-5 rounded-full bg-veri/10 text-veri flex items-center justify-center mr-2 mt-0.5 text-xs font-bold">4</span>
-                      <span>Receive a detailed analysis with similarity scores and matching sources</span>
-                    </li>
-                  </ul>
+                  <div className="flex flex-col space-y-6">
+                    {[
+                      {
+                        step: 1,
+                        title: "Upload Your Document",
+                        description: "Start by uploading your document in PDF, DOCX, or TXT format through our secure system."
+                      },
+                      {
+                        step: 2,
+                        title: "Text Extraction & Analysis",
+                        description: "Our advanced algorithms extract and analyze the text from your document, preparing it for comparison."
+                      },
+                      {
+                        step: 3,
+                        title: "Source Comparison",
+                        description: "The content is compared against billions of online sources, academic papers, and our extensive database."
+                      },
+                      {
+                        step: 4,
+                        title: "Detailed Reporting",
+                        description: "Receive a comprehensive analysis with similarity scores, matching sources, and highlighted passages."
+                      }
+                    ].map((item) => (
+                      <div key={item.step} className="flex">
+                        <div className="mr-6 flex-shrink-0">
+                          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-veri text-white font-bold text-lg">
+                            {item.step}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold mb-2">{item.title}</h4>
+                          <p className="text-muted-foreground">{item.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 
-                <div>
-                  <h4 className="text-lg font-medium mb-3">Best Practices</h4>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li className="flex items-start">
-                      <CheckCircle size={16} className="text-veri mr-2 mt-0.5" />
-                      <span>Check drafts before final submission to catch issues early</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle size={16} className="text-veri mr-2 mt-0.5" />
-                      <span>Review all highlighted matches, some may be coincidental</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle size={16} className="text-veri mr-2 mt-0.5" />
-                      <span>Use proper citations for all referenced materials</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle size={16} className="text-veri mr-2 mt-0.5" />
-                      <span>For text-only checking, use the "Text Check" feature</span>
-                    </li>
+                <div className="bg-secondary/20 rounded-xl p-8 border border-border/50">
+                  <h4 className="text-xl font-semibold mb-6">Best Practices for Accurate Results</h4>
+                  
+                  <ul className="space-y-4">
+                    {[
+                      "Check drafts before final submission to catch issues early",
+                      "Review all highlighted matches, as some may be coincidental",
+                      "Use proper citations for all referenced materials",
+                      "For text-only checking, use the direct text input option",
+                      "Upload complete documents rather than fragments for context",
+                      "Consider checking translated work with our cross-language detection"
+                    ].map((tip, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle size={20} className="text-veri mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-muted-foreground">{tip}</span>
+                      </li>
+                    ))}
                   </ul>
+                  
+                  <div className="mt-8 p-4 bg-veri/10 rounded-lg border border-veri/20">
+                    <p className="text-sm text-center font-medium text-veri">
+                      Our detection engine gets smarter with every check, continuously improving accuracy and coverage
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </GlassmorphismCard>
         </div>
       </main>
+      
+      {/* Add Footer */}
+      <Footer />
     </div>
   );
 };

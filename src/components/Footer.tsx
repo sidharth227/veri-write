@@ -13,7 +13,7 @@ const Footer = () => {
               An advanced plagiarism detection platform for educational institutions.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                 <Github size={20} />
               </a>
             </div>
