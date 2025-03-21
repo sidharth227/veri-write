@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, FileText, AlertCircle, CheckCircle, FileDown, Eye, Trash2, Loader } from 'lucide-react';
@@ -87,13 +88,17 @@ const UploadCheck = () => {
     setErrorMessage('');
     
     try {
+      // API INTEGRATION PLACEHOLDER: Replace this with actual API call to check for plagiarism
+      // Create a FormData object to send files to the server
       const formData = new FormData();
       files.forEach((file, index) => {
         formData.append(`file-${index}`, file);
       });
       
+      // Simulating API delay
       await new Promise(resolve => setTimeout(resolve, 3000));
       
+      // MOCK RESPONSE: Replace with actual API response
       const mockResults: PlagiarismResult = {
         message: "Plagiarism check complete",
         results: [
@@ -143,6 +148,8 @@ const UploadCheck = () => {
     if (!results) return;
     
     try {
+      // API INTEGRATION PLACEHOLDER: Replace this with actual API call to view detailed report
+      // You might redirect to a new page or open a modal with detailed report data
       toast({
         title: "Opening Report",
         description: "Opening detailed plagiarism report in a new window.",
@@ -163,6 +170,8 @@ const UploadCheck = () => {
     if (!results) return;
     
     try {
+      // API INTEGRATION PLACEHOLDER: Replace this with actual API call to download the report as PDF
+      // This should trigger a file download in the browser
       toast({
         title: "Downloading Report",
         description: "Your plagiarism report is being downloaded as a PDF.",
@@ -342,6 +351,7 @@ const UploadCheck = () => {
                     </div>
                   )}
 
+                  {/* RESULTS DISPLAY: This is the updated section that displays plagiarism results */}
                   {results && !isAnalyzing && !isApiError && (
                     <div className="space-y-6 animate-fade-in">
                       <div className="bg-veri/10 p-4 rounded-lg border border-veri/20">
@@ -367,15 +377,15 @@ const UploadCheck = () => {
                             >
                               <div className="flex justify-between items-center">
                                 <div className="truncate max-w-[200px]">
+                                  {/* Format: file1 vs file2 - similarity% (level) */}
                                   <span className="font-medium">{item.file1}</span>
                                   {" vs "}
                                   <span className="font-medium">{item.file2}</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
+                                  {" - "}
                                   <span className="font-bold">{item.similarity}</span>
-                                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                                    {item.level}
-                                  </span>
+                                  {" ("}
+                                  <span>{item.level}</span>
+                                  {")"}
                                 </div>
                               </div>
                             </div>
@@ -413,5 +423,42 @@ const UploadCheck = () => {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-6">How It Works</h3>
                 
-                <
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {steps.map((step, index) => (
+                    <div 
+                      key={index}
+                      className={cn(
+                        "p-4 border rounded-lg transition-all duration-300",
+                        activeStep === index 
+                          ? "border-veri/30 bg-veri/5 shadow-md" 
+                          : "border-border bg-secondary/30 hover:border-veri/20 hover:bg-secondary/40"
+                      )}
+                      onClick={() => setActiveStep(index)}
+                    >
+                      <div className="flex items-center mb-3">
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center mr-3",
+                          activeStep === index ? "bg-veri text-white" : "bg-secondary border border-border text-muted-foreground"
+                        )}>
+                          {index + 1}
+                        </div>
+                        <h4 className="font-medium">{step.title}</h4>
+                      </div>
+                      <p className="text-muted-foreground text-sm pl-11">
+                        {step.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </GlassmorphismCard>
+          </div>
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+};
 
+export default UploadCheck;
