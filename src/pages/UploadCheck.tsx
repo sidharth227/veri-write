@@ -1,20 +1,39 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, AlertCircle, CheckCircle, FileDown, Eye, Trash2 } from 'lucide-react';
+import { Upload, FileText, AlertCircle, CheckCircle, FileDown, Eye, Trash2, Loader } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import CustomButton from '@/components/ui/CustomButton';
 import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
 import { cn } from '@/lib/utils';
 import Footer from '@/components/Footer';
 
+// Define interface for plagiarism results returned from API
+interface PlagiarismResult {
+  score: number;       // Overall similarity score (percentage)
+  matches: number;     // Number of matching sources found
+  details?: {          // Optional detailed information
+    matchedSources?: Array<{
+      title: string;
+      url: string;
+      matchPercentage: number;
+    }>;
+    highlightedText?: Array<{
+      text: string;
+      matchId: string;
+    }>;
+  }
+}
+
 const UploadCheck = () => {
   const { toast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [results, setResults] = useState<null | { score: number; matches: number }>(null);
+  const [results, setResults] = useState<null | PlagiarismResult>(null);
   const [activeStep, setActiveStep] = useState<number>(0);
+  const [isApiError, setIsApiError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -62,7 +81,16 @@ const UploadCheck = () => {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const analyzeFiles = () => {
+  /**
+   * Analyze uploaded files for plagiarism
+   * 
+   * @remarks
+   * This function sends the uploaded files to the plagiarism detection API
+   * and updates the UI with the results.
+   * 
+   * @returns void
+   */
+  const analyzeFiles = async () => {
     if (files.length === 0) {
       toast({
         title: "No files to analyze",
@@ -73,36 +101,179 @@ const UploadCheck = () => {
     }
 
     setIsAnalyzing(true);
+    setIsApiError(false);
+    setErrorMessage('');
     
-    // Simulate plagiarism check with timeout
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setResults({
-        score: Math.floor(Math.random() * 30), // Random similarity score between 0-30%
-        matches: Math.floor(Math.random() * 10) // Random number of matches
+    try {
+      // INTEGRATION POINT: Replace this code block with your API implementation
+      // ===================================================================
+      // 1. Create a FormData object with the files
+      const formData = new FormData();
+      files.forEach((file, index) => {
+        formData.append(`file-${index}`, file);
       });
+      
+      // 2. Make the API call to your plagiarism detection service
+      // const response = await fetch('YOUR_API_ENDPOINT', {
+      //   method: 'POST',
+      //   body: formData,
+      //   headers: {
+      //     'Authorization': 'Bearer YOUR_API_KEY'
+      //   }
+      // });
+      
+      // 3. Handle the API response
+      // if (!response.ok) {
+      //   throw new Error(`API Error: ${response.status}`);
+      // }
+      // const data = await response.json();
+      // setResults(data);
+      // ===================================================================
+      
+      // Simulating API call with timeout (REMOVE THIS IN PRODUCTION)
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Mock results (REPLACE WITH ACTUAL API RESPONSE)
+      const mockResults: PlagiarismResult = {
+        score: Math.floor(Math.random() * 30),
+        matches: Math.floor(Math.random() * 10),
+        details: {
+          matchedSources: [
+            { title: "Academic Paper #1", url: "https://example.com/paper1", matchPercentage: 12 },
+            { title: "Online Article #2", url: "https://example.com/article2", matchPercentage: 8 }
+          ]
+        }
+      };
+      
+      setResults(mockResults);
       
       toast({
         title: "Analysis Complete",
         description: "We've completed the plagiarism analysis for your documents.",
       });
-    }, 3000);
+    } catch (error) {
+      console.error("Plagiarism check error:", error);
+      setIsApiError(true);
+      setErrorMessage(error instanceof Error ? error.message : "Unknown error occurred");
+      
+      toast({
+        title: "Error analyzing documents",
+        description: "There was a problem analyzing your documents. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
-  const viewReport = () => {
-    // In a real application, this would open a detailed report view
-    toast({
-      title: "Opening Report",
-      description: "Opening detailed plagiarism report in a new window.",
-    });
+  /**
+   * View detailed plagiarism report
+   * 
+   * @remarks
+   * This function fetches and displays the detailed plagiarism report.
+   * 
+   * @returns void
+   */
+  const viewReport = async () => {
+    if (!results) return;
+    
+    try {
+      // INTEGRATION POINT: Replace this code block with your API implementation
+      // ===================================================================
+      // 1. Make the API call to fetch the detailed report
+      // const reportId = "GENERATE_OR_RETRIEVE_REPORT_ID";
+      // const response = await fetch(`YOUR_API_ENDPOINT/reports/${reportId}`, {
+      //   method: 'GET',
+      //   headers: {
+      //     'Authorization': 'Bearer YOUR_API_KEY'
+      //   }
+      // });
+      
+      // 2. Handle the response
+      // if (!response.ok) {
+      //   throw new Error(`API Error: ${response.status}`);
+      // }
+      // const reportData = await response.json();
+      // 
+      // 3. Display the report in your UI
+      // window.open(reportData.reportUrl, '_blank');
+      // ===================================================================
+      
+      // In a real application, this would open a detailed report view
+      toast({
+        title: "Opening Report",
+        description: "Opening detailed plagiarism report in a new window.",
+      });
+      
+      // Simulating opening a report (REPLACE WITH ACTUAL IMPLEMENTATION)
+      // For example, you might open a new window or display a modal with the report
+      console.log("Viewing report for results:", results);
+    } catch (error) {
+      console.error("Error viewing report:", error);
+      toast({
+        title: "Error viewing report",
+        description: "There was a problem retrieving the report. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const downloadReport = () => {
-    // In a real application, this would generate and download a PDF
-    toast({
-      title: "Downloading Report",
-      description: "Your plagiarism report is being downloaded as a PDF.",
-    });
+  /**
+   * Download plagiarism report as PDF
+   * 
+   * @remarks
+   * This function generates and downloads the plagiarism report as a PDF file.
+   * 
+   * @returns void
+   */
+  const downloadReport = async () => {
+    if (!results) return;
+    
+    try {
+      // INTEGRATION POINT: Replace this code block with your API implementation
+      // ===================================================================
+      // 1. Make the API call to generate the PDF report
+      // const reportId = "GENERATE_OR_RETRIEVE_REPORT_ID";
+      // const response = await fetch(`YOUR_API_ENDPOINT/reports/${reportId}/pdf`, {
+      //   method: 'GET',
+      //   headers: {
+      //     'Authorization': 'Bearer YOUR_API_KEY'
+      //   }
+      // });
+      
+      // 2. Handle the response
+      // if (!response.ok) {
+      //   throw new Error(`API Error: ${response.status}`);
+      // }
+      
+      // 3. Download the PDF file
+      // const blob = await response.blob();
+      // const url = window.URL.createObjectURL(blob);
+      // const a = document.createElement('a');
+      // a.href = url;
+      // a.download = `plagiarism-report-${Date.now()}.pdf`;
+      // document.body.appendChild(a);
+      // a.click();
+      // document.body.removeChild(a);
+      // window.URL.revokeObjectURL(url);
+      // ===================================================================
+      
+      // In a real application, this would generate and download a PDF
+      toast({
+        title: "Downloading Report",
+        description: "Your plagiarism report is being downloaded as a PDF.",
+      });
+      
+      // Simulating download operation (REPLACE WITH ACTUAL IMPLEMENTATION)
+      console.log("Downloading report PDF for results:", results);
+    } catch (error) {
+      console.error("Error downloading report:", error);
+      toast({
+        title: "Error downloading report",
+        description: "There was a problem generating the PDF report. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Steps for the "How It Works" section
@@ -234,7 +405,21 @@ const UploadCheck = () => {
                     Analysis Results
                   </h3>
                   
-                  {!results && !isAnalyzing && (
+                  {/* Error state */}
+                  {isApiError && (
+                    <div className="flex flex-col items-center justify-center h-60 text-center">
+                      <AlertCircle size={40} className="text-destructive mb-4" />
+                      <p className="text-destructive font-medium mb-2">
+                        Error analyzing documents
+                      </p>
+                      <p className="text-muted-foreground text-sm">
+                        {errorMessage || "Please try again or contact support."}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Empty state */}
+                  {!results && !isAnalyzing && !isApiError && (
                     <div className="flex flex-col items-center justify-center h-60 text-center">
                       <AlertCircle size={40} className="text-muted-foreground mb-4 opacity-60" />
                       <p className="text-muted-foreground">
@@ -243,6 +428,7 @@ const UploadCheck = () => {
                     </div>
                   )}
 
+                  {/* Loading state */}
                   {isAnalyzing && (
                     <div className="flex flex-col items-center justify-center h-60 text-center">
                       <div className="w-16 h-16 relative mb-4">
@@ -252,10 +438,14 @@ const UploadCheck = () => {
                       <p className="text-muted-foreground">
                         Analyzing documents for plagiarism...
                       </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        This may take a few moments depending on file size and complexity.
+                      </p>
                     </div>
                   )}
 
-                  {results && !isAnalyzing && (
+                  {/* Results state */}
+                  {results && !isAnalyzing && !isApiError && (
                     <div className="space-y-6 animate-fade-in">
                       <div className="bg-secondary/30 p-5 rounded-lg border border-border">
                         <div className="flex justify-between items-center mb-3">
@@ -304,6 +494,28 @@ const UploadCheck = () => {
                            "High similarity - significant matching content detected"}
                         </span>
                       </div>
+
+                      {/* Optional: Display matched sources if available */}
+                      {results.details?.matchedSources && results.details.matchedSources.length > 0 && (
+                        <div className="space-y-2">
+                          <h4 className="font-medium mb-1">Matched Sources</h4>
+                          <div className="max-h-32 overflow-y-auto space-y-2">
+                            {results.details.matchedSources.map((source, idx) => (
+                              <div key={idx} className="text-xs p-2 bg-secondary/20 rounded border border-border">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-medium">{source.title}</span>
+                                  <span className="px-1.5 py-0.5 rounded-full bg-veri/10 text-veri">
+                                    {source.matchPercentage}%
+                                  </span>
+                                </div>
+                                <div className="text-muted-foreground truncate mt-1">
+                                  {source.url}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-2 gap-3 pt-2">
                         <CustomButton 
