@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, FileText, AlertCircle, CheckCircle, FileDown, Eye, Trash2, Loader } from 'lucide-react';
@@ -8,21 +7,14 @@ import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
 import { cn } from '@/lib/utils';
 import Footer from '@/components/Footer';
 
-// Define interface for plagiarism results returned from API
 interface PlagiarismResult {
-  score: number;       // Overall similarity score (percentage)
-  matches: number;     // Number of matching sources found
-  details?: {          // Optional detailed information
-    matchedSources?: Array<{
-      title: string;
-      url: string;
-      matchPercentage: number;
-    }>;
-    highlightedText?: Array<{
-      text: string;
-      matchId: string;
-    }>;
-  }
+  message: string;
+  results: Array<{
+    file1: string;
+    file2: string;
+    similarity: string;
+    level: string;
+  }>;
 }
 
 const UploadCheck = () => {
@@ -60,7 +52,6 @@ const UploadCheck = () => {
   };
 
   const handleFiles = (newFiles: File[]) => {
-    // Filter for acceptable file types
     const acceptedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
     const validFiles = newFiles.filter(file => acceptedTypes.includes(file.type));
     
@@ -81,15 +72,6 @@ const UploadCheck = () => {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  /**
-   * Analyze uploaded files for plagiarism
-   * 
-   * @remarks
-   * This function sends the uploaded files to the plagiarism detection API
-   * and updates the UI with the results.
-   * 
-   * @returns void
-   */
   const analyzeFiles = async () => {
     if (files.length === 0) {
       toast({
@@ -105,44 +87,35 @@ const UploadCheck = () => {
     setErrorMessage('');
     
     try {
-      // INTEGRATION POINT: Replace this code block with your API implementation
-      // ===================================================================
-      // 1. Create a FormData object with the files
       const formData = new FormData();
       files.forEach((file, index) => {
         formData.append(`file-${index}`, file);
       });
       
-      // 2. Make the API call to your plagiarism detection service
-      // const response = await fetch('YOUR_API_ENDPOINT', {
-      //   method: 'POST',
-      //   body: formData,
-      //   headers: {
-      //     'Authorization': 'Bearer YOUR_API_KEY'
-      //   }
-      // });
-      
-      // 3. Handle the API response
-      // if (!response.ok) {
-      //   throw new Error(`API Error: ${response.status}`);
-      // }
-      // const data = await response.json();
-      // setResults(data);
-      // ===================================================================
-      
-      // Simulating API call with timeout (REMOVE THIS IN PRODUCTION)
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Mock results (REPLACE WITH ACTUAL API RESPONSE)
       const mockResults: PlagiarismResult = {
-        score: Math.floor(Math.random() * 30),
-        matches: Math.floor(Math.random() * 10),
-        details: {
-          matchedSources: [
-            { title: "Academic Paper #1", url: "https://example.com/paper1", matchPercentage: 12 },
-            { title: "Online Article #2", url: "https://example.com/article2", matchPercentage: 8 }
-          ]
-        }
+        message: "Plagiarism check complete",
+        results: [
+          {
+            file1: "1.jpg",
+            file2: "1.jpg",
+            similarity: "100.00%",
+            level: "High"
+          },
+          {
+            file1: "1.jpg",
+            file2: "img.jpg",
+            similarity: "5.21%",
+            level: "Low"
+          },
+          {
+            file1: "1.jpg",
+            file2: "sample.jpg",
+            similarity: "5.21%",
+            level: "Low"
+          }
+        ]
       };
       
       setResults(mockResults);
@@ -166,47 +139,15 @@ const UploadCheck = () => {
     }
   };
 
-  /**
-   * View detailed plagiarism report
-   * 
-   * @remarks
-   * This function fetches and displays the detailed plagiarism report.
-   * 
-   * @returns void
-   */
   const viewReport = async () => {
     if (!results) return;
     
     try {
-      // INTEGRATION POINT: Replace this code block with your API implementation
-      // ===================================================================
-      // 1. Make the API call to fetch the detailed report
-      // const reportId = "GENERATE_OR_RETRIEVE_REPORT_ID";
-      // const response = await fetch(`YOUR_API_ENDPOINT/reports/${reportId}`, {
-      //   method: 'GET',
-      //   headers: {
-      //     'Authorization': 'Bearer YOUR_API_KEY'
-      //   }
-      // });
-      
-      // 2. Handle the response
-      // if (!response.ok) {
-      //   throw new Error(`API Error: ${response.status}`);
-      // }
-      // const reportData = await response.json();
-      // 
-      // 3. Display the report in your UI
-      // window.open(reportData.reportUrl, '_blank');
-      // ===================================================================
-      
-      // In a real application, this would open a detailed report view
       toast({
         title: "Opening Report",
         description: "Opening detailed plagiarism report in a new window.",
       });
       
-      // Simulating opening a report (REPLACE WITH ACTUAL IMPLEMENTATION)
-      // For example, you might open a new window or display a modal with the report
       console.log("Viewing report for results:", results);
     } catch (error) {
       console.error("Error viewing report:", error);
@@ -218,53 +159,15 @@ const UploadCheck = () => {
     }
   };
 
-  /**
-   * Download plagiarism report as PDF
-   * 
-   * @remarks
-   * This function generates and downloads the plagiarism report as a PDF file.
-   * 
-   * @returns void
-   */
   const downloadReport = async () => {
     if (!results) return;
     
     try {
-      // INTEGRATION POINT: Replace this code block with your API implementation
-      // ===================================================================
-      // 1. Make the API call to generate the PDF report
-      // const reportId = "GENERATE_OR_RETRIEVE_REPORT_ID";
-      // const response = await fetch(`YOUR_API_ENDPOINT/reports/${reportId}/pdf`, {
-      //   method: 'GET',
-      //   headers: {
-      //     'Authorization': 'Bearer YOUR_API_KEY'
-      //   }
-      // });
-      
-      // 2. Handle the response
-      // if (!response.ok) {
-      //   throw new Error(`API Error: ${response.status}`);
-      // }
-      
-      // 3. Download the PDF file
-      // const blob = await response.blob();
-      // const url = window.URL.createObjectURL(blob);
-      // const a = document.createElement('a');
-      // a.href = url;
-      // a.download = `plagiarism-report-${Date.now()}.pdf`;
-      // document.body.appendChild(a);
-      // a.click();
-      // document.body.removeChild(a);
-      // window.URL.revokeObjectURL(url);
-      // ===================================================================
-      
-      // In a real application, this would generate and download a PDF
       toast({
         title: "Downloading Report",
         description: "Your plagiarism report is being downloaded as a PDF.",
       });
       
-      // Simulating download operation (REPLACE WITH ACTUAL IMPLEMENTATION)
       console.log("Downloading report PDF for results:", results);
     } catch (error) {
       console.error("Error downloading report:", error);
@@ -276,7 +179,6 @@ const UploadCheck = () => {
     }
   };
 
-  // Steps for the "How It Works" section
   const steps = [
     {
       title: "Upload Documents",
@@ -300,7 +202,6 @@ const UploadCheck = () => {
       <Navbar />
       
       <main className="container max-w-6xl mx-auto pt-28 pb-16 px-6 relative">
-        {/* Decorative background elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-10 -left-20 w-96 h-96 bg-veri/5 rounded-full blur-3xl"></div>
           <div className="absolute bottom-1/3 -right-20 w-96 h-96 bg-write/5 rounded-full blur-3xl"></div>
@@ -405,7 +306,6 @@ const UploadCheck = () => {
                     Analysis Results
                   </h3>
                   
-                  {/* Error state */}
                   {isApiError && (
                     <div className="flex flex-col items-center justify-center h-60 text-center">
                       <AlertCircle size={40} className="text-destructive mb-4" />
@@ -418,7 +318,6 @@ const UploadCheck = () => {
                     </div>
                   )}
                   
-                  {/* Empty state */}
                   {!results && !isAnalyzing && !isApiError && (
                     <div className="flex flex-col items-center justify-center h-60 text-center">
                       <AlertCircle size={40} className="text-muted-foreground mb-4 opacity-60" />
@@ -428,7 +327,6 @@ const UploadCheck = () => {
                     </div>
                   )}
 
-                  {/* Loading state */}
                   {isAnalyzing && (
                     <div className="flex flex-col items-center justify-center h-60 text-center">
                       <div className="w-16 h-16 relative mb-4">
@@ -444,78 +342,46 @@ const UploadCheck = () => {
                     </div>
                   )}
 
-                  {/* Results state */}
                   {results && !isAnalyzing && !isApiError && (
                     <div className="space-y-6 animate-fade-in">
-                      <div className="bg-secondary/30 p-5 rounded-lg border border-border">
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="font-medium">Similarity Score</span>
-                          <span className={cn(
-                            "font-bold text-lg",
-                            results.score < 15 ? "text-green-500" : 
-                            results.score < 25 ? "text-amber-500" : "text-red-500"
-                          )}>
-                            {results.score}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
-                          <div 
-                            className={cn(
-                              "h-full rounded-full transition-all duration-1000",
-                              results.score < 15 ? "bg-green-500" : 
-                              results.score < 25 ? "bg-amber-500" : "bg-red-500"
-                            )}
-                            style={{ width: `${results.score}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2">Matches Found</h4>
-                        <div className="flex items-center space-x-2">
-                          <div className="bg-secondary/30 px-4 py-2 rounded-lg border border-border">
-                            <span className="font-bold text-lg">{results.matches}</span>
-                          </div>
-                          <span className="text-muted-foreground text-sm">
-                            sources with similar content
-                          </span>
-                        </div>
+                      <div className="bg-veri/10 p-4 rounded-lg border border-veri/20">
+                        <p className="font-medium text-center text-veri">
+                          {results.message}
+                        </p>
                       </div>
                       
-                      <div className={cn(
-                        "p-4 rounded-lg flex items-center space-x-3",
-                        results.score < 15 ? "bg-green-500/10 text-green-500 border border-green-200" : 
-                        results.score < 25 ? "bg-amber-500/10 text-amber-500 border border-amber-200" : "bg-red-500/10 text-red-500 border border-red-200"
-                      )}>
-                        <CheckCircle size={20} />
-                        <span className="text-sm font-medium">
-                          {results.score < 15 ? "Low similarity - likely original content" : 
-                           results.score < 25 ? "Moderate similarity - review highlighted sections" : 
-                           "High similarity - significant matching content detected"}
-                        </span>
-                      </div>
-
-                      {/* Optional: Display matched sources if available */}
-                      {results.details?.matchedSources && results.details.matchedSources.length > 0 && (
-                        <div className="space-y-2">
-                          <h4 className="font-medium mb-1">Matched Sources</h4>
-                          <div className="max-h-32 overflow-y-auto space-y-2">
-                            {results.details.matchedSources.map((source, idx) => (
-                              <div key={idx} className="text-xs p-2 bg-secondary/20 rounded border border-border">
-                                <div className="flex justify-between items-center">
-                                  <span className="font-medium">{source.title}</span>
-                                  <span className="px-1.5 py-0.5 rounded-full bg-veri/10 text-veri">
-                                    {source.matchPercentage}%
+                      <div>
+                        <h4 className="font-medium mb-2">Comparison Results</h4>
+                        <div className="space-y-2 max-h-60 overflow-y-auto pr-2 scrollbar-thin">
+                          {results.results.map((item, index) => (
+                            <div 
+                              key={index} 
+                              className={cn(
+                                "p-3 rounded-lg border transition-all hover:bg-secondary/40",
+                                item.level === "High" 
+                                  ? "bg-red-500/10 border-red-200 text-red-600" 
+                                  : item.level === "Medium"
+                                    ? "bg-amber-500/10 border-amber-200 text-amber-600"
+                                    : "bg-green-500/10 border-green-200 text-green-600"
+                              )}
+                            >
+                              <div className="flex justify-between items-center">
+                                <div className="truncate max-w-[200px]">
+                                  <span className="font-medium">{item.file1}</span>
+                                  {" vs "}
+                                  <span className="font-medium">{item.file2}</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-bold">{item.similarity}</span>
+                                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                                    {item.level}
                                   </span>
                                 </div>
-                                <div className="text-muted-foreground truncate mt-1">
-                                  {source.url}
-                                </div>
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          ))}
                         </div>
-                      )}
+                      </div>
 
                       <div className="grid grid-cols-2 gap-3 pt-2">
                         <CustomButton 
@@ -547,55 +413,5 @@ const UploadCheck = () => {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-6">How It Works</h3>
                 
-                {/* Interactive stepper */}
-                <div className="relative">
-                  {/* Progress line */}
-                  <div className="absolute left-7 top-0 bottom-0 w-0.5 bg-gradient-to-b from-veri/50 via-veri/30 to-veri/10 z-0"></div>
-                  
-                  <div className="space-y-8">
-                    {steps.map((step, index) => (
-                      <div 
-                        key={index}
-                        className={`relative flex items-start gap-4 p-4 rounded-xl transition-all duration-300 ${
-                          activeStep === index ? 'bg-veri/5 shadow-sm transform scale-102' : 'hover:bg-veri/5'
-                        }`}
-                        onMouseEnter={() => setActiveStep(index)}
-                      >
-                        <div className={`w-14 h-14 rounded-full flex items-center justify-center z-10 transition-all duration-500 ${
-                          activeStep === index 
-                            ? 'bg-veri/20 shadow-veri/20 shadow-md' 
-                            : 'bg-veri/10'
-                        }`}>
-                          {step.icon}
-                        </div>
-                        
-                        <div className="flex-1">
-                          <h4 className={`font-medium text-lg mb-2 transition-colors ${
-                            activeStep === index ? 'text-veri' : ''
-                          }`}>
-                            {step.title}
-                          </h4>
-                          <p className="text-muted-foreground">
-                            {step.description}
-                          </p>
-                        </div>
-                        
-                        {activeStep === index && (
-                          <div className="absolute -inset-px bg-veri/5 rounded-xl -z-10 animate-pulse opacity-50"></div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </GlassmorphismCard>
-          </div>
-        </div>
-      </main>
-      
-      <Footer />
-    </div>
-  );
-};
+                <
 
-export default UploadCheck;
