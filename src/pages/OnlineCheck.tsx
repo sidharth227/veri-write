@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { Upload, ExternalLink, AlertCircle, CheckCircle, File, FileText, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Upload, ExternalLink, AlertCircle, CheckCircle, File, FileText, X, ImageIcon } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CustomButton from '@/components/ui/CustomButton';
@@ -27,12 +27,19 @@ const OnlineCheck = () => {
 
   const handleFile = (newFile: File) => {
     // Check if file is PDF, DOCX, or other acceptable format
-    const acceptedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    const acceptedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+    ];
     
     if (!acceptedTypes.includes(newFile.type)) {
       toast({
         title: "Invalid file type",
-        description: "Please upload a PDF, DOCX, or TXT file.",
+        description: "Please upload a PDF, DOCX, TXT, or image file.",
         variant: "destructive"
       });
       return;
@@ -71,7 +78,7 @@ const OnlineCheck = () => {
     }
   };
 
-  const analyzeFile = () => {
+  const analyzeFile = async () => {
     if (!file) {
       toast({
         title: "No file selected",
@@ -82,32 +89,81 @@ const OnlineCheck = () => {
     }
 
     setIsAnalyzing(true);
-    
-    // Simulate plagiarism check with timeout
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      
-      // Generate mock results
-      const mockScore = Math.floor(Math.random() * 40);
-      const mockMatches = Math.floor(Math.random() * 5) + 1;
-      
-      const mockSources = Array.from({ length: mockMatches }, (_, i) => ({
-        url: `https://example${i + 1}.com/article${Math.floor(Math.random() * 100)}`,
-        similarity: Math.floor(Math.random() * 30) + 10,
-        title: `Sample Academic Article ${i + 1}`
-      }));
-      
-      setResults({
-        score: mockScore,
-        matches: mockMatches,
-        sources: mockSources
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('api/onlinecheck/online-check', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Assuming you store the JWT token in localStorage
+        },
+        body: formData,
       });
-      
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to analyze file');
+      }
+
+      const result = await response.json();
       toast({
         title: "Analysis Complete",
         description: "We've completed the plagiarism analysis of your document.",
       });
-    }, 2500);
+
+      // Update the state with the results from the backend
+      setResults({
+        score: 0, // You might need to calculate this based on the backend response
+        matches: result.matches.length,
+        sources: result.matches.slice(0, 3).map((match: any) => ({ // Top 3 matches
+          url: match.link,
+          similarity: match.similarity,
+          title: match.title,
+        })),
+      });
+
+    } catch (error: any) {
+      toast({
+        title: "Analysis Failed",
+        description: error.message || "An error occurred during analysis.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+
+  const downloadReport = async () => {
+    try {
+      const response = await fetch('api/onlinecheck/download-report', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to download report');
+      }
+  
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Online_Check_Report.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      toast({
+        title: "Download Failed",
+        description: error.message || "An error occurred while downloading the report.",
+        variant: "destructive"
+      });
+    }
   };
 
   const clearFile = () => {
@@ -117,15 +173,19 @@ const OnlineCheck = () => {
 
   const getFileIcon = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase();
-    
-    switch(extension) {
-      case 'pdf':
-        return <FileText size={24} className="text-red-500" />;
-      case 'docx':
-      case 'doc':
-        return <FileText size={24} className="text-blue-500" />;
-      default:
-        return <File size={24} className="text-gray-500" />;
+
+    switch (extension) {
+        case 'pdf':
+            return <FileText size={24} className="text-red-500" />;
+        case 'docx':
+        case 'doc':
+            return <FileText size={24} className="text-blue-500" />;
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+            return <ImageIcon size={24} className="text-green-500" />;
+        default:
+            return <File size={24} className="text-gray-500" />;
     }
   };
 
@@ -178,21 +238,22 @@ const OnlineCheck = () => {
                       <Upload size={48} className="text-muted-foreground mb-4" />
                       <h4 className="font-medium mb-2">Drag & drop your document here</h4>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Supported formats: PDF, DOCX, TXT (Max 10MB)
+                        Supported formats: PDF, DOCX, TXT, JPG, PNG (Max 10MB)
                       </p>
-                      <label className="cursor-pointer">
+                      <label className="cursor-pointer" htmlFor="fileInput">
                         <CustomButton 
-                          variant="outline"
-                          size="sm"
+                          variant="outline" 
+                          size="sm" 
                           type="button"
                         >
                           Browse Files
                         </CustomButton>
-                        <input 
-                          type="file" 
-                          className="hidden" 
+                        <input
+                          id="fileInput"
+                          type="file"
+                          className="hidden"
                           onChange={handleFileChange}
-                          accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                          accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/jpeg,image/png,image/jpg"
                         />
                       </label>
                     </div>
@@ -330,6 +391,14 @@ const OnlineCheck = () => {
                     >
                       View Detailed Report
                     </CustomButton>
+
+                    <CustomButton
+                      variant="outline"
+                      fullWidth
+                      onClick={downloadReport}
+                    >
+                      Download Report
+                    </CustomButton>
                   </div>
                 )}
               </div>
@@ -349,7 +418,7 @@ const OnlineCheck = () => {
                       {
                         step: 1,
                         title: "Upload Your Document",
-                        description: "Start by uploading your document in PDF, DOCX, or TXT format through our secure system."
+                        description: "Start by uploading your document in PDF, DOCX, TXT or image format through our secure system."
                       },
                       {
                         step: 2,
@@ -413,7 +482,6 @@ const OnlineCheck = () => {
         </div>
       </main>
       
-      {/* Add Footer */}
       <Footer />
     </div>
   );
