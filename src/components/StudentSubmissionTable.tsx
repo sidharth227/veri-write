@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from 'react';
-import { FileText, Eye, DownloadCloud, AlertTriangle, CheckCircle, FileDown, Download, X } from 'lucide-react';
+import { FileText, Eye, DownloadCloud, AlertTriangle, CheckCircle, FileDown, Download } from 'lucide-react';
 import CustomButton from '@/components/ui/CustomButton';
 import GlassmorphismCard from '@/components/ui/GlassmorphismCard';
 import { useToast } from '@/hooks/use-toast';
