@@ -169,7 +169,7 @@ const StudentSubmissionTable = ({ assignmentId, students }: StudentSubmissionTab
                 <th className="px-4 py-3 text-left text-sm font-medium">Roll No.</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Student</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Submission</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">Plagiarism %</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
               </tr>
             </thead>
@@ -204,21 +204,17 @@ const StudentSubmissionTable = ({ assignmentId, students }: StudentSubmissionTab
                     )}
                   </td>
                   <td className="px-4 py-4">
-                    {student.submission ? (
-                      student.submission.checked && student.submission.similarity !== undefined ? (
-                        <span 
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlagiarismColor(student.submission.similarity)}`}
-                        >
-                          {student.submission.similarity <= 40 ? (
-                            <CheckCircle className="mr-1" size={12} />
-                          ) : (
-                            <AlertTriangle className="mr-1" size={12} />
-                          )}
-                          {student.submission.similarity}% similarity
-                        </span>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">Not checked</span>
-                      )
+                    {student.submission && student.submission.checked && student.submission.similarity !== undefined ? (
+                      <span 
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlagiarismColor(student.submission.similarity)}`}
+                      >
+                        {student.submission.similarity <= 40 ? (
+                          <CheckCircle className="mr-1" size={12} />
+                        ) : (
+                          <AlertTriangle className="mr-1" size={12} />
+                        )}
+                        {student.submission.similarity}%
+                      </span>
                     ) : (
                       <span className="text-sm text-muted-foreground">-</span>
                     )}
